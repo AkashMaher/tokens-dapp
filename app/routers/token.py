@@ -3,9 +3,11 @@ from fastapi import APIRouter, HTTPException, Body
 from app.models.token import Insight, InsightRequest, InsightResponse, Token
 from app.services.ai import AIGeneration
 from app.services.coingecko import fetch_token_data, fetch_historical_data
+from logging import getLogger
 
 router = APIRouter()
 
+logger = getLogger(__name__)
 
 def get_ai_service() -> AIGeneration:
     return AIGeneration()
@@ -35,7 +37,7 @@ async def get_insight(coin_id: str, req: InsightRequest = Body(None)):
         fetch_historical = req.fetch_historical if req else True
         vs_currency = req.vs_currency if req else "usd"
         history_days = req.history_days if req else 30
-
+        logger.info(f"Received insight request for {coin_id} with vs_currency={vs_currency}, fetch_historical={fetch_historical}, history_days={history_days}")
         data = fetch_token_data(coin_id, vs_currency)
 
         historical_prices = {}
@@ -77,7 +79,10 @@ async def get_insight(coin_id: str, req: InsightRequest = Body(None)):
             insight=Insight(**insight),
             model=model_info,
         )
+        
+        logger.info(f"Generated insight for {coin_id} using model {model_info['model']} from provider {model_info['provider']}")
 
         return full_response.model_dump(exclude_none=True)
     except ValueError as e:
+        logger.error(f"Error processing insight request for {coin_id}: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))

@@ -3,7 +3,10 @@ from typing import Dict, Any
 from app.models.token import Token, MarketData
 from dotenv import load_dotenv
 import os
+from logging import getLogger
 load_dotenv()
+
+logger = getLogger(__name__)
 
 COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY", None)
 BASE_URL = "https://api.coingecko.com/api/v3"
@@ -53,14 +56,16 @@ def fetch_token_data(coin_id: str, vs_currency: str = "usd") -> Dict[str, Any]:
             name=meta["name"],
             market_data=market_data,
         )
-
+        logger.info(f"Fetched token data for {coin_id}: price={market_data.current_price_usd} USD, market_cap={market_data.market_cap_usd} USD, volume_24h={market_data.total_volume_usd} USD, change_24h={market_data.price_change_percentage_24h}%")
         return {
             "source": "coingecko",
             "token": token.model_dump(), 
         }
     except requests.exceptions.RequestException as e:
+        logger.error(f"CoinGecko API request error: {str(e)}")
         raise ValueError(f"CoinGecko API error: {str(e)}")
     except KeyError as e:
+        logger.error(f"Invalid coin ID or missing data for {coin_id}: {str(e)}")
         raise ValueError(f"Invalid coin ID or missing data: {str(e)}")
     
 
@@ -73,6 +78,8 @@ def fetch_historical_data(coin_id: str, vs_currency: str = "usd", days: int = 30
             "days": days
         }
         history_response = _get(endpoint, params)
+        logger.info(f"Fetched historical data for {coin_id} for the past {days} days")
         return history_response.json()
     except requests.exceptions.RequestException as e:
+        logger.error(f"CoinGecko API request error for historical data: {str(e)}")
         raise ValueError(f"CoinGecko API error: {str(e)}")

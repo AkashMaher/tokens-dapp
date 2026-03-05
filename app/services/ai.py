@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 from typing import Dict, Any
 from app.models.token import Insight, ModelInfo
+from logging import getLogger
 
 load_dotenv()
 
@@ -19,6 +20,8 @@ class AIGeneration:
                 base_url="https://api.groq.com/openai/v1",
             )
         }
+        
+        self.logger = getLogger("AIGeneration")
 
     def get_client(self, model_name: str = None) -> OpenAI:
         if model_name not in self.clients:
@@ -72,12 +75,16 @@ class AIGeneration:
             )
 
             model_info = ModelInfo(provider=provider, model=model)
+            
+            self.logger.info(f"AI insight generated successfully with model {model} from provider {provider}")
 
             return validated_insight.model_dump(), model_info.model_dump()
 
         except json.JSONDecodeError as e:
+            self.logger.error(f"JSON parsing error from AI response: {str(e)}. Response content: {content if 'content' in locals() else 'N/A'}")
             raise ValueError(f"Invalid JSON from AI: {str(e)}")
         except Exception as e:
+            self.logger.error(f"Error during AI insight generation: {str(e)}. Response content: {content if 'content' in locals() else 'N/A'}")
             raise ValueError(
                 f"AI call failed: {str(e)}. Response content: {content if 'content' in locals() else 'N/A'}"
             )
