@@ -6,8 +6,30 @@ from app.services.coingecko import fetch_token_data, fetch_historical_data
 from logging import getLogger
 
 router = APIRouter()
-
 logger = getLogger(__name__)
+
+cached = {}
+
+
+def get_cached_insight(coin_id: str, vs_currency: str, history_days: int):
+    try:
+        key = f"{coin_id}_{vs_currency}_{history_days}"
+        entry = cached.get(key)
+        if entry and (datetime.now() - entry["timestamp"]).total_seconds() < 60:
+            logger.info(f"Returning cached insight for {key}")
+            return entry["response"]
+        return None
+    except Exception as e:
+        logger.error(f"Failed to get cached insight for {key}: {e}")
+        return None
+    
+def cache_insight(coin_id: str, vs_currency: str, history_days: int, response: InsightResponse):
+    try:
+        key = f"{coin_id}_{vs_currency}_{history_days}"
+        cached[key] = {"response": response, "timestamp": datetime.now()}
+        logger.info(f"Cached insight for {key}")
+    except Exception as e:
+        logger.error(f"Failed to cache insight for {key}: {e}")
 
 
 def get_ai_service() -> AIGeneration:
@@ -41,6 +63,9 @@ async def get_insight(coin_id: str, req: InsightRequest = Body(None)):
         logger.info(
             f"Received insight request for {coin_id} with vs_currency={vs_currency}, fetch_historical={fetch_historical}, history_days={history_days}"
         )
+        results = get_cached_insight(coin_id, vs_currency, history_days)
+        if results:
+            return results
         data = fetch_token_data(coin_id, vs_currency)
 
         historical_prices = {}
@@ -82,8 +107,9 @@ async def get_insight(coin_id: str, req: InsightRequest = Body(None)):
         logger.info(
             f"Generated insight for {coin_id} using model {model_info['model']} from provider {model_info['provider']}"
         )
+        cache_insight(coin_id, vs_currency, history_days, full_response)
 
-        return full_response.model_dump(exclude_none=True)
+        return full_response
     except ValueError as e:
         logger.error(f"Error processing insight request for {coin_id}: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
