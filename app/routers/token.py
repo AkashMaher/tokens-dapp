@@ -15,7 +15,7 @@ def get_cached_insight(coin_id: str, vs_currency: str, history_days: int):
     try:
         key = f"{coin_id}_{vs_currency}_{history_days}"
         entry = cached.get(key)
-        if entry and (datetime.now() - entry["timestamp"]).total_seconds() < 60:
+        if entry and (datetime.now() - entry["timestamp"]).total_seconds() < 30:
             logger.info(f"Returning cached insight for {key}")
             return entry["response"]
         return None

@@ -17,7 +17,7 @@ def get_cached_pnl(wallet: str, start: str, end: str) -> PnLResponse | None:
     try:
         key = f"{wallet}_{start}_{end}"
         entry = cached.get(key)
-        if entry and (datetime.now() - entry["timestamp"]).total_seconds() < 60:
+        if entry and (datetime.now() - entry["timestamp"]).total_seconds() < 30:
             logger.info(f"Returning cached insight for {key}")
             return entry["response"]
         return None
