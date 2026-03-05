@@ -17,7 +17,7 @@ class Token(BaseModel):
     symbol: str
     name: str
     market_data: MarketData
-    historical_prices: str | int | float | dict | None = None
+    historical_prices: Optional[dict] = None
 
 class PartialInsightResponse(BaseModel):  
     source: str
@@ -40,7 +40,6 @@ class InsightResponse(BaseModel):
     token: Token
     insight: Insight
     model: dict[str, str]
-    historical_data: Optional[dict] = None
     
     
 class ModelInfo(BaseModel):

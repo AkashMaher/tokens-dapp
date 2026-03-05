@@ -9,6 +9,7 @@ router = APIRouter()
 
 logger = getLogger(__name__)
 
+
 def get_ai_service() -> AIGeneration:
     return AIGeneration()
 
@@ -24,10 +25,10 @@ def get_closest_price(prices: list[tuple[int, float]], target_ts: int) -> float 
     for ts, price in reversed(prices):
         if ts <= target_ts:
             return price
-    return None 
+    return None
 
 
-@router.post("/api/token/{coin_id}/insight")
+@router.post("/api/token/{coin_id}/insight", response_model=InsightResponse)
 async def get_insight(coin_id: str, req: InsightRequest = Body(None)):
     """
     Fetch token metadata and market data from CoinGecko.
@@ -37,7 +38,9 @@ async def get_insight(coin_id: str, req: InsightRequest = Body(None)):
         fetch_historical = req.fetch_historical if req else True
         vs_currency = req.vs_currency if req else "usd"
         history_days = req.history_days if req else 30
-        logger.info(f"Received insight request for {coin_id} with vs_currency={vs_currency}, fetch_historical={fetch_historical}, history_days={history_days}")
+        logger.info(
+            f"Received insight request for {coin_id} with vs_currency={vs_currency}, fetch_historical={fetch_historical}, history_days={history_days}"
+        )
         data = fetch_token_data(coin_id, vs_currency)
 
         historical_prices = {}
@@ -51,13 +54,10 @@ async def get_insight(coin_id: str, req: InsightRequest = Body(None)):
             if prices:
                 now_ms = int(datetime.now(tz=timezone.utc).timestamp() * 1000)
                 intervals = {
-                    "48h_ago": 2 * 24 * 3600 * 1000, 
-                    "7d_ago": 7 * 24 * 3600 * 1000, 
-                    "15d_ago": 15 * 24 * 3600 * 1000,  
-                    "29d_ago": 29
-                    * 24
-                    * 3600
-                    * 1000,  
+                    "48h_ago": 2 * 24 * 3600 * 1000,
+                    "7d_ago": 7 * 24 * 3600 * 1000,
+                    "15d_ago": 15 * 24 * 3600 * 1000,
+                    "29d_ago": 29 * 24 * 3600 * 1000,
                 }
                 for label, delta_ms in intervals.items():
                     if delta_ms // (24 * 3600 * 1000) <= history_days:
@@ -68,7 +68,6 @@ async def get_insight(coin_id: str, req: InsightRequest = Body(None)):
 
                 if historical_prices:
                     data["token"]["historical_prices"] = historical_prices
-            
 
         aiservice = get_ai_service()
         insight, model_info = await aiservice.generate_insight(token_data=data["token"])
@@ -79,8 +78,10 @@ async def get_insight(coin_id: str, req: InsightRequest = Body(None)):
             insight=Insight(**insight),
             model=model_info,
         )
-        
-        logger.info(f"Generated insight for {coin_id} using model {model_info['model']} from provider {model_info['provider']}")
+
+        logger.info(
+            f"Generated insight for {coin_id} using model {model_info['model']} from provider {model_info['provider']}"
+        )
 
         return full_response.model_dump(exclude_none=True)
     except ValueError as e:
