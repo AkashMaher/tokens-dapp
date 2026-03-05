@@ -79,6 +79,31 @@ Run on local
 uvicorn app.main:app --reload
 ```
 
+Check endpoints swagger UI http://localhost:8000/docs
+
+Run on production
+
+Docker Build Image
+
+```bash
+docker build -t token-app .
+```
+
+To import in postman
+
+1. Open Postman & Click on Import
+2. In the Import dialog box enter `http://localhost:8000/openapi.json`
+3. Ensure "Generate a collection from the import" is selected. Postman will detect the "OpenAPI 3.0" format.
+4. Now Click on Import
+
+New collection will get created
+
+Run docker container
+
+```bash
+docker run -d --name mytoken-app --env-file .env -p 8000:8000 token-app
+```
+
 # API Endpoints
 
 1. Token Insight
@@ -137,6 +162,7 @@ curl "http://localhost:8000/api/hyperliquid/0xcd82f03d5df801a69af899a7f13263388e
 ```
 
 Example response:
+
 ```json
 {
   "wallet": "0xcd82f03d5df801a69af899a7f13263388e1f6274",
@@ -240,9 +266,8 @@ Example response:
 }
 ```
 
-
-
 ## AI Setup (Groq)
+
 We use Groq for fast, free inference.
 
 1. Go to https://console.groq.com
@@ -252,9 +277,7 @@ We use Groq for fast, free inference.
 
 Model used: `llama-3.1-8b-instant` (free, fast, reliable JSON output).
 
-
-
-# Tests 
+# Tests
 
 Run test cases
 ```bash
@@ -267,10 +290,6 @@ pytest tests/test_token.py -s -p no:warnings -vv
 pytest tests/ -s -p no:warnings -vv
 ```
 
-
-
-
-
 ## Project Structure
 
 ```bash
@@ -282,6 +301,8 @@ pytest tests/ -s -p no:warnings -vv
 ├── tests/                      # pytest tests
 ├── logs/                       # log files
 ├── .env.example
+├── Dockerfile
+├── .dockerignore
 ├── requirements.txt
 ├── .gitignore
 └── README.md
