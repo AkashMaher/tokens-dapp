@@ -10,7 +10,7 @@ router = APIRouter()
 def get_hyperliquid_client() -> HyperLiquidClient:
     return HyperLiquidClient()
 
-@router.get("/api/hyperliquid/{wallet}/pnl", response_model=PnLResponse)
+@router.get("/hyperliquid/{wallet}/pnl", response_model=PnLResponse)
 async def get_pnl(
     wallet: str,
     start: str = Query(..., description="Start date YYYY-MM-DD"),

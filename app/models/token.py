@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from typing import Optional
 
 class InsightRequest(BaseModel):
@@ -28,7 +28,7 @@ class Insight(BaseModel):
     reasoning: str
     sentiment: str  
 
-    @validator("sentiment")
+    @field_validator("sentiment")
     def validate_sentiment(cls, v):
         if v not in ["Bullish", "Bearish", "Neutral"]:
             raise ValueError('sentiment must be "Bullish", "Bearish", or "Neutral"')

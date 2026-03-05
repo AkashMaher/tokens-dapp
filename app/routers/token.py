@@ -28,7 +28,7 @@ def get_closest_price(prices: list[tuple[int, float]], target_ts: int) -> float 
     return None
 
 
-@router.post("/api/token/{coin_id}/insight", response_model=InsightResponse)
+@router.post("/token/{coin_id}/insight", response_model=InsightResponse)
 async def get_insight(coin_id: str, req: InsightRequest = Body(None)):
     """
     Fetch token metadata and market data from CoinGecko.
