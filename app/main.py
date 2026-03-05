@@ -3,8 +3,8 @@ from app.routers import token
 import uvicorn
 
 app = FastAPI(
-    title="Token Insight APP",
-    version="1.0.0"
+    title="Token Insight App with AI",
+    version="1.0.1"
 )
 
 app.include_router(token.router, prefix="/api")

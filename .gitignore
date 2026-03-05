@@ -8,3 +8,15 @@ __pycache__/
 dist/
 build/
 /logs/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+*.backup
+*.swp
+.DS_Store
+.idea/
+.vscode/
