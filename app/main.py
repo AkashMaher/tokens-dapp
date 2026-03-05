@@ -5,7 +5,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 
-app = FastAPI(title="Token Insight App with AI", version="1.0.1")
+app = FastAPI(title="Token Insight & Hyperliquid App with AI", version="1.0.2")
 
 
 # Log configs
