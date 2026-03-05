@@ -92,7 +92,7 @@ docker build -t token-app .
 To import in postman
 
 1. Open Postman & Click on Import
-2. In the Import dialog box enter `http://localhost:8000/openapi.json`
+2. In the Import dialog box enter `http://localhost:8000/openapi.json` OR Import `.postman_collection.json` file
 3. Ensure "Generate a collection from the import" is selected. Postman will detect the "OpenAPI 3.0" format.
 4. Now Click on Import
 
