@@ -9,7 +9,7 @@ Backend service built for the assignment that provides:
 
 - **POST /api/token/{coin_id}/insight**  
   Fetches current market data + selected historical price points (48h, 7d, 15d, 30d ago) from CoinGecko  
-  Generates insight (reasoning + sentiment: Bullish/Bearish/Neutral) using Groq (Llama 3)
+  Generates insight (reasoning + sentiment: Bullish/Bearish/Neutral) using Groq 
 
 - **GET /api/hyperliquid/{wallet}/pnl?start=YYYY-MM-DD&end=YYYY-MM-DD**  
   Fetches wallet activity (fills/trades, funding payments, current positions) from HyperLiquid Info API  
@@ -20,19 +20,19 @@ Backend service built for the assignment that provides:
 
 - **Backend**: Python + FastAPI
 - **HTTP Client**: requests
-- **AI Provider**: Groq (free tier, Llama 3 8B model) – very fast inference with JSON mode
+- **AI Provider**: Groq 
 - **Data Sources**:
   - CoinGecko API (free, no key required)
   - HyperLiquid Info API (direct POST to `/info`, no key/auth required)
 - **Validation**: Pydantic
 - **Logging**: Python `logging` module
 - **Testing**: pytest
-- **Containerization**: Docker (preferred for deliverable)
+- **Containerization**: Docker (preferred for producation delivered)
 
 ## Prerequisites
 
 - Python 3.10+
-- Docker (recommended for production-like run)
+- Docker 
 - Groq API key (free signup: https://console.groq.com/keys)
 
 ## Installation & Setup
@@ -73,7 +73,7 @@ COINGECKO_API_KEY=your_coingecko_api_key
 
 ### ================
 
-Run on local
+## Run on local
 
 ```bash
 uvicorn app.main:app --reload
@@ -81,7 +81,7 @@ uvicorn app.main:app --reload
 
 Check endpoints swagger UI http://localhost:8000/docs
 
-Run on production
+## Run on production
 
 Docker Build Image
 
@@ -89,16 +89,16 @@ Docker Build Image
 docker build -t token-app .
 ```
 
-To import in postman
+## To import in postman
 
 1. Open Postman & Click on Import
 2. In the Import dialog box enter `http://localhost:8000/openapi.json` OR Import `.postman_collection.json` file
 3. Ensure "Generate a collection from the import" is selected. Postman will detect the "OpenAPI 3.0" format.
 4. Now Click on Import
 
-New collection will get created
+5. New collection will get created
 
-Run docker container
+## Run docker container
 
 ```bash
 docker run -d --name mytoken-app --env-file .env -p 8000:8000 token-app
@@ -106,7 +106,7 @@ docker run -d --name mytoken-app --env-file .env -p 8000:8000 token-app
 
 # API Endpoints
 
-1. Token Insight
+## 1. Token Insight
 
 POST `/api/token/{coin_id}/insight`
 
@@ -151,7 +151,7 @@ Example response:
 }
 ```
 
-2. HyperLiquid Wallet Daily PnL
+## 2. HyperLiquid Wallet Daily PnL
 
 GET `/api/hyperliquid/{wallet}/pnl?start=YYYY-MM-DD&end=YYYY-MM-DD`
 
@@ -275,7 +275,7 @@ We use Groq for fast, free inference.
 3. Create a new API key
 4. Paste it into `.env` as `GROQ_API_KEY=...`
 
-Model used: `llama-3.1-8b-instant` (free, fast, reliable JSON output).
+5. Model used: `llama-3.1-8b-instant` (free, fast, reliable JSON output).
 
 # Tests
 
@@ -303,6 +303,7 @@ pytest tests/ -s -p no:warnings -vv
 ├── .env.example
 ├── Dockerfile
 ├── .dockerignore
+├── .postman_collection.json
 ├── requirements.txt
 ├── .gitignore
 └── README.md
