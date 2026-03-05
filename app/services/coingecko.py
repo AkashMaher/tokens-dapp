@@ -1,27 +1,44 @@
 import requests
 from typing import Dict, Any
 from app.models.token import Token, MarketData
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
+COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY", None)
 BASE_URL = "https://api.coingecko.com/api/v3"
 
+
+
+def _get(endpoint: str, params: Dict[str, Any] = None) -> requests.Response:
+    url = f"{BASE_URL}{endpoint}"
+    if params is None:
+        params = {}
+    if COINGECKO_API_KEY:
+        params["api_key"] = COINGECKO_API_KEY
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+    return response
+    
+
 def fetch_token_data(coin_id: str, vs_currency: str = "usd") -> Dict[str, Any]:
+    """Fetch token metadata and market data from CoinGecko."""
     try:
-        meta_url = f"{BASE_URL}/coins/{coin_id}"
-        meta_response = requests.get(meta_url)
-        meta_response.raise_for_status()
+        meta_response = _get(f"/coins/{coin_id}")
         meta = meta_response.json()
 
-        market_url = (
-            f"{BASE_URL}/simple/price?"
-            f"ids={coin_id}&"
-            f"vs_currencies={vs_currency}&"
-            f"include_market_cap=true&"
-            f"include_24hr_vol=true&"
-            f"include_24hr_change=true"
-        )
-        market_response = requests.get(market_url)
-        market_response.raise_for_status()
-        price_data = market_response.json()[coin_id]
+        endpoint = "/simple/price"
+        params = {
+            "ids": coin_id,
+            "vs_currencies": vs_currency,
+            "include_market_cap": "true",
+            "include_24hr_vol": "true",
+            "include_24hr_change": "true"
+        }
+        
+        market_response = _get(endpoint, params)
+        data = market_response.json()
+        price_data = data[coin_id]
 
         market_data = MarketData(
             current_price_usd=price_data[vs_currency],
@@ -48,10 +65,14 @@ def fetch_token_data(coin_id: str, vs_currency: str = "usd") -> Dict[str, Any]:
     
 
 def fetch_historical_data(coin_id: str, vs_currency: str = "usd", days: int = 30) -> Dict[str, Any]:
+    """Fetch historical price data for a token from CoinGecko."""
     try:
-        history_url = f"{BASE_URL}/coins/{coin_id}/market_chart?vs_currency={vs_currency}&days={days}"
-        history_response = requests.get(history_url)
-        history_response.raise_for_status()
+        endpoint = f"/coins/{coin_id}/market_chart"
+        params = {
+            "vs_currency": vs_currency,
+            "days": days
+        }
+        history_response = _get(endpoint, params)
         return history_response.json()
     except requests.exceptions.RequestException as e:
         raise ValueError(f"CoinGecko API error: {str(e)}")
